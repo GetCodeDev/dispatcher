@@ -9,8 +9,8 @@
  * file that was distributed with this source code.
  */
 
-use App;
 use Config;
+use Illuminate\Console\Command;
 use Illuminate\Foundation\Console\ConsoleMakeCommand;
 
 /**
@@ -19,6 +19,7 @@ use Illuminate\Foundation\Console\ConsoleMakeCommand;
  */
 class Make extends ConsoleMakeCommand
 {
+
     /**
      * The console command name.
      *
@@ -33,36 +34,45 @@ class Make extends ConsoleMakeCommand
      */
     protected $description = 'Create a new scheduled artisan command';
 
+
     /**
-     * @param string $name
+     * @param string $file
+     * @param string $stub
+     *
      * @codeCoverageIgnore
      */
-    protected function buildClass($name)
+    protected function writeCommand($file, $stub)
     {
-        return $this->extendStub(parent::buildClass($name));
+        return parent::writeCommand($file, $this->extendStub($stub));
     }
+
 
     /**
      * Make sure we're implementing our own class
+     *
      * @param $stub
+     *
      * @return string
      */
     protected function extendStub($stub)
     {
-        /** @var \Illuminate\Filesystem\Filesystem $files */
-        $files = App::make('Illuminate\Filesystem\Filesystem');
-        $content = $files->get(__DIR__.DIRECTORY_SEPARATOR.'stubs'.DIRECTORY_SEPARATOR.'command.stub');
-
         $replacements = [
-            'use Illuminate\Console\Command' => "use Indatus\\Dispatcher\\Scheduling\\ScheduledCommand;\n".
-                "use Indatus\\Dispatcher\\Scheduling\\Schedulable;\n".
-                "use Indatus\\Dispatcher\\Drivers\\".ucwords(Config::get('dispatcher::driver'))."\\Scheduler",
-            'extends Command {' => 'extends ScheduledCommand {',
-            'parent::__construct();' => $content,
+            'use Illuminate\Console\Command' => "use Indatus\\Dispatcher\\Scheduling\\ScheduledCommand;\n"."use Indatus\\Dispatcher\\Scheduling\\Schedulable;\n"."use Indatus\\Dispatcher\\Drivers\\".ucwords(config('dispatcher.driver'))."\\Scheduler",
+            'extends Command {'              => 'extends ScheduledCommand {',
+            'parent::__construct();'         => $this->getStub()
         ];
 
         $stub = str_replace(array_keys($replacements), array_values($replacements), $stub);
 
         return $stub;
     }
-}
+
+
+    /**
+     * Get our own stub
+     */
+    protected function getStub()
+    {
+        return file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'stubs'.DIRECTORY_SEPARATOR.'command.stub');
+    }
+} 

@@ -5,4 +5,3 @@ build
 tests/coverage
 tests/meta
 .idea
-phpunit.xml

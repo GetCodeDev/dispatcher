@@ -1,16 +1,16 @@
-<?php namespace Indatus\Dispatcher\Commands;
-
+<?php
 /**
  * @author Ben Kuhl <bkuhl@indatus.com>
  */
 
+use Indatus\Dispatcher\Commands\Run;
 use Mockery as m;
-use TestCase;
 
 class TestRun extends TestCase
 {
+
     /**
-     * @var \Indatus\Dispatcher\Commands\Run
+     * @var Indatus\Dispatcher\Commands\Run
      */
     private $command;
 
@@ -22,6 +22,12 @@ class TestRun extends TestCase
             m::mock('Indatus\Dispatcher\Services\CommandService'),
             m::mock('Indatus\Dispatcher\Drivers\Cron\ScheduleService')
         );
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+        m::close();
     }
 
     public function testName()
@@ -40,13 +46,14 @@ class TestRun extends TestCase
                 $m->shouldReceive('runDue')->once();
             });
 
-        $command = m::mock('Indatus\Dispatcher\Commands\Run[option]', [
+        $command = m::mock('Indatus\Dispatcher\Commands\Run[option]', array(
             $commandService
-        ]);
-        $command->shouldReceive('option')->andReturn([]);
+            ));
+        $command->shouldReceive('option')->andReturn(array());
         $command->run(
             m::mock('Symfony\Component\Console\Input\InputInterface')->shouldIgnoreMissing(),
             m::mock('Symfony\Component\Console\Output\OutputInterface')->shouldIgnoreMissing()
         );
     }
-}
+
+} 

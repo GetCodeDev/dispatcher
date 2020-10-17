@@ -10,16 +10,11 @@
  */
 
 use App;
-use Illuminate\Foundation\Application;
+use Config;
+use Illuminate\Contracts\Support\DeferrableProvider;
 
-class ServiceProvider extends \Illuminate\Support\ServiceProvider
+class ServiceProvider extends \Illuminate\Support\ServiceProvider implements DeferrableProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = true;
 
     /**
      * Bootstrap the application events.
@@ -28,20 +23,13 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function boot()
     {
-        $this->package('indatus/dispatcher');
+        //$this->package('indatus/dispatcher');
 
-        $resolver = $this->app->make('\Indatus\Dispatcher\ConfigResolver');
-
-        //load the scheduler of the appropriate driver
-        $this->app->bind('Indatus\Dispatcher\Scheduling\Schedulable', function () use ($resolver) {
-            return $resolver->resolveSchedulerClass();
-        });
-
-        //load the schedule service of the appropriate driver
-        $this->app->bind('Indatus\Dispatcher\Services\ScheduleService', function () use ($resolver) {
-            return $resolver->resolveServiceClass();
-        });
+        $this->publishes([
+            __DIR__.'/../../config/config.php' => config_path('dispatcher.php'),
+        ]);
     }
+
 
     /**
      * Register the service provider.
@@ -51,8 +39,32 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/../../config/config.php', 'dispatcher');
+
+        /** @var \Indatus\Dispatcher\ConfigResolver $resolver */
+        $resolver = App::make('\Indatus\Dispatcher\ConfigResolver');
+
+        //load the scheduler of the appropriate driver
+        App::bind('Indatus\Dispatcher\Scheduling\Schedulable', function () use ($resolver) {
+            return $resolver->resolveSchedulerClass();
+        });
+
+        //load the schedule service of the appropriate driver
+        App::bind('Indatus\Dispatcher\Services\ScheduleService', function () use ($resolver) {
+            return $resolver->resolveServiceClass();
+        });
+
+        App::bind('Indatus\Dispatcher\OptionReader', function () use ($resolver) {
+            return $resolver->resolveSchedulerClass();
+        });
+
+        App::bind('Indatus\Dispatcher\Drivers\Cron\Scheduler', function () use ($resolver) {
+            return $resolver->resolveSchedulerClass();
+        });
+
         $this->registerCommands();
     }
+
 
     /**
      * Get the services provided by the provider.
@@ -68,6 +80,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         ];
     }
 
+
     /**
      * Register artisan commands
      * @codeCoverageIgnore
@@ -75,20 +88,22 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     private function registerCommands()
     {
         //scheduled:summary
-        $this->app->bindShared('command.scheduled.summary', function (Application $app) {
-            return $app->make('Indatus\Dispatcher\Commands\ScheduleSummary');
+        $this->app->bind('command.scheduled.summary', function ($app) {
+            return App::make('Indatus\Dispatcher\Commands\ScheduleSummary');
         });
+        $this->commands('command.scheduled.summary');
 
         //scheduled:make
-        $this->app->bindShared('command.scheduled.make', function (Application $app) {
-            return $app->make('Indatus\Dispatcher\Commands\Make');
+        $this->app->bind('command.scheduled.make', function ($app) {
+            return App::make('Indatus\Dispatcher\Commands\Make');
         });
+        $this->commands('command.scheduled.make');
 
         //scheduled:run
-        $this->app->bindShared('command.scheduled.run', function (Application $app) {
-            return $app->make('Indatus\Dispatcher\Commands\Run');
+        $this->app->bind('command.scheduled.run', function ($app) {
+            return App::make('Indatus\Dispatcher\Commands\Run');
         });
-
-        $this->commands($this->provides());
+        $this->commands('command.scheduled.run');
     }
+
 }

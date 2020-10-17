@@ -1,29 +1,29 @@
-<?php namespace Indatus\Dispatcher;
-
+<?php
 /**
  * @author Ben Kuhl <bkuhl@indatus.com>
  */
 
-use App;
-use Config;
-use TestCase;
+use Indatus\Dispatcher\Scheduler;
+use Mockery as m;
 
 class TestConfig extends TestCase
 {
+
+    public function tearDown()
+    {
+        parent::tearDown();
+        m::close();
+    }
+
     public function testDefaultDriver()
     {
-        $this->assertEquals(Config::get('dispatcher::driver'), 'dateTime');
+        $this->assertEquals(config('dispatcher.driver'), 'cron');
     }
 
     public function testDefaultSchedulerClass()
     {
         $serviceProvider = App::make('Indatus\Dispatcher\Scheduling\Schedulable');
-        $this->assertInstanceOf('Indatus\Dispatcher\Drivers\DateTime\Scheduler', $serviceProvider);
+        $this->assertInstanceOf('Indatus\Dispatcher\Drivers\Cron\Scheduler', $serviceProvider);
     }
 
-    public function testDefaultServiceClass()
-    {
-        $serviceProvider = App::make('Indatus\Dispatcher\Services\ScheduleService');
-        $this->assertInstanceOf('Indatus\Dispatcher\Drivers\DateTime\ScheduleService', $serviceProvider);
-    }
 }

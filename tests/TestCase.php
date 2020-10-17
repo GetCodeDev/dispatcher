@@ -1,14 +1,14 @@
 <?php
-
 /**
  * @author Ben Kuhl <bkuhl@indatus.com>
  */
 
-abstract class TestCase extends Orchestra\Testbench\TestCase
+class TestCase extends Orchestra\Testbench\TestCase
 {
-    protected function getPackageProviders($app)
+
+    protected function getPackageProviders()
     {
-        return ['Indatus\Dispatcher\ServiceProvider'];
+        return array('Indatus\Dispatcher\ServiceProvider');
     }
 
     /**
@@ -18,12 +18,13 @@ abstract class TestCase extends Orchestra\Testbench\TestCase
      */
     protected function getPackagePath()
     {
-        return realpath(implode(DIRECTORY_SEPARATOR, [
+        return realpath(implode(DIRECTORY_SEPARATOR, array(
             __DIR__,
             '..',
             'src',
             'Indatus',
             'Dispatcher'
-        ]));
+        )));
     }
-}
+
+} 

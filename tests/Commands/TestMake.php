@@ -1,18 +1,16 @@
-<?php namespace Indatus\Dispatcher\Commands;
-
+<?php
 /**
  * @author Ben Kuhl <bkuhl@indatus.com>
  */
 
-use Config;
+use Indatus\Dispatcher\Commands\Make;
 use Mockery as m;
-use ReflectionClass;
-use TestCase;
 
 class TestMake extends TestCase
 {
+
     /**
-     * @var \Indatus\Dispatcher\Commands\Make
+     * @var Indatus\Dispatcher\Commands\Make
      */
     private $command;
 
@@ -44,6 +42,17 @@ class TestMake extends TestCase
         $this->assertFileExists($this->getStubPath('command.stub'));
     }
 
+    public function testStub()
+    {
+        //force visibility for testing
+        $class = new ReflectionClass('Indatus\Dispatcher\Commands\Make');
+        $method = $class->getMethod('getStub');
+        $method->setAccessible(true);
+
+        $stubContents = file_get_contents($this->getStubPath('command.stub'));
+        $this->assertEquals($stubContents, $method->invoke($this->makeFactory(), 'getStub'));
+    }
+
     public function testExtendStub()
     {
         //force visibility for testing
@@ -53,13 +62,13 @@ class TestMake extends TestCase
 
         $stubContents = file_get_contents($this->getStubPath('command.stub'));
 
-        $replacements = [
+        $replacements = array(
             'use Illuminate\Console\Command' => "use Indatus\\Dispatcher\\Scheduling\\ScheduledCommand;\n".
                 "use Indatus\\Dispatcher\\Scheduling\\Schedulable;\n".
-                "use Indatus\\Dispatcher\\Drivers\\".ucwords(Config::get('dispatcher::driver'))."\\Scheduler",
+                "use Indatus\\Dispatcher\\Drivers\\".ucwords(config('dispatcher.driver'))."\\Scheduler",
             'extends Command {' => 'extends ScheduledCommand {',
-            'parent::__construct();' => $stubContents,
-        ];
+            'parent::__construct();' => $stubContents
+        );
 
         $delimeter = '*****';
         $extendedStub = $method->invoke($this->makeFactory(), implode($delimeter, array_keys($replacements)));
@@ -69,16 +78,17 @@ class TestMake extends TestCase
 
     private function getStubPath($filename)
     {
-        return implode(DIRECTORY_SEPARATOR, [
+        return implode(DIRECTORY_SEPARATOR, array(
                 $this->getPackagePath(),
                 'Commands',
                 'stubs',
                 $filename
-            ]);
+            ));
     }
 
     private function makeFactory()
     {
         return new Make(m::mock('Illuminate\Filesystem\Filesystem'));
     }
-}
+
+} 

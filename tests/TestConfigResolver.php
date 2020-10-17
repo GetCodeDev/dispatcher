@@ -1,60 +1,57 @@
-<?php namespace Indatus\Dispatcher;
-
+<?php
 /**
  * @author Ben Kuhl <bkuhl@indatus.com>
  */
 
-use App;
-use Config;
-use TestCase;
+use Indatus\Dispatcher\ConfigResolver;
+use Indatus\Dispatcher\Scheduler;
+use Mockery as m;
 
 class TestConfigResolver extends TestCase
 {
-    /** @var ConfigResolver */
-    protected $configResolver;
 
-    public function setUp()
+    public function tearDown()
     {
-        parent::setUp();
-        $this->configResolver = App::make('Indatus\Dispatcher\ConfigResolver');
+        parent::tearDown();
+        m::close();
     }
 
     public function testLoadingSchedulerPackagedDriver()
     {
+        $resolver = new ConfigResolver();
         $this->assertInstanceOf(
-            'Indatus\Dispatcher\Drivers\DateTime\Scheduler',
-            $this->configResolver->resolveSchedulerClass()
+            'Indatus\Dispatcher\Drivers\Cron\Scheduler',
+            $resolver->resolveSchedulerClass()
         );
     }
 
     public function testLoadingServiceCustomDriver()
     {
-        Config::shouldReceive('get')->andReturn('dateTime')->once();
+        Config::shouldReceive('get')->andReturn('cron');
+        $resolver = new ConfigResolver();
         $this->assertInstanceOf(
             'Indatus\Dispatcher\Scheduling\Schedulable',
-            $this->configResolver->resolveSchedulerClass()
+            $resolver->resolveSchedulerClass()
         );
     }
 
     public function testLoadingServicePackagedDriver()
     {
+        $resolver = new ConfigResolver();
         $this->assertInstanceOf(
             'Indatus\Dispatcher\Services\ScheduleService',
-            $this->configResolver->resolveServiceClass()
+            $resolver->resolveServiceClass()
         );
     }
 
     public function testLoadingSchedulerCustomDriver()
     {
-        Config::shouldReceive('get')->andReturn('dateTime')->once();
+        Config::shouldReceive('get')->andReturn('cron');
+        $resolver = new ConfigResolver();
         $this->assertInstanceOf(
             'Indatus\Dispatcher\Services\ScheduleService',
-            $this->configResolver->resolveServiceClass()
+            $resolver->resolveServiceClass()
         );
     }
 
-    public function testDriverCasing()
-    {
-        $this->assertEquals('DateTime', $this->configResolver->getDriver());
-    }
 }

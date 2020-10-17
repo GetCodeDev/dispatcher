@@ -9,10 +9,11 @@
  * file that was distributed with this source code.
  */
 
-use App;
 use Illuminate\Console\Command;
+use Indatus\Dispatcher\OptionReader;
 use Indatus\Dispatcher\Services\CommandService;
 use Symfony\Component\Console\Input\InputOption;
+use App;
 
 /**
  * Run any commands that should be run
@@ -20,8 +21,10 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class Run extends Command
 {
-    /** @var \Indatus\Dispatcher\Services\CommandService|null  */
+
+    /** @var \Indatus\Dispatcher\Services\CommandService|null */
     private $commandService = null;
+
 
     public function __construct(CommandService $commandService)
     {
@@ -29,6 +32,7 @@ class Run extends Command
 
         $this->commandService = $commandService;
     }
+
 
     /**
      * The console command name.
@@ -44,6 +48,7 @@ class Run extends Command
      */
     protected $description = 'Run scheduled commands';
 
+
     /**
      * Get the console command options.
      *
@@ -52,28 +57,27 @@ class Run extends Command
     protected function getOptions()
     {
         return [
-            ['debug', 'd', InputOption::VALUE_NONE, 'Output debug information about why commands do/don\'t run.'],
+            [ 'debug', 'd', InputOption::VALUE_NONE, 'Output debug information about why commands do/don\'t run.' ],
         ];
     }
+
 
     /**
      * Execute the console command.
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         /** @var \Indatus\Dispatcher\OptionReader $optionReader */
-        $optionReader = App::make('Indatus\Dispatcher\OptionReader', [
-                $this->option(),
-            ]);
+        $optionReader = app()->make(OptionReader::class, $this->option());
 
         /** @var \Indatus\Dispatcher\Debugger $debugger */
-        $debugger = App::make('Indatus\Dispatcher\Debugger', [
-                $optionReader,
-                $this->getOutput(),
-            ]);
+        $debugger = app()->make('Indatus\Dispatcher\Debugger', [
+            $optionReader,
+            $this->getOutput()
+        ]);
 
         $this->commandService->runDue($debugger);
     }
-}
+} 

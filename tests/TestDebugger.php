@@ -1,14 +1,15 @@
-<?php namespace Indatus\Dispatcher;
-
+<?php
 /**
  * @author Ben Kuhl <bkuhl@indatus.com>
  */
 
+use Indatus\Dispatcher\Scheduler;
 use Mockery as m;
-use TestCase;
+use Indatus\Dispatcher\Debugger;
 
 class TestDebugger extends TestCase
 {
+
     protected $output;
 
     protected $optionReader;
@@ -16,6 +17,12 @@ class TestDebugger extends TestCase
     protected $scheduledCommand;
 
     protected $commandName = 'my:command';
+
+    public function tearDown()
+    {
+        parent::tearDown();
+        m::close();
+    }
 
     public function setUp()
     {
@@ -70,4 +77,5 @@ class TestDebugger extends TestCase
 
         $debugger->log($message);
     }
+
 }

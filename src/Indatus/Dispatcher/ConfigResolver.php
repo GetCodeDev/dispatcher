@@ -9,23 +9,11 @@
  * file that was distributed with this source code.
  */
 
-use Illuminate\Contracts\Config\Repository;
-use Illuminate\Contracts\Container\Container;
-use ReflectionException;
+use App;
+use Config;
 
 class ConfigResolver
 {
-    /** @var Repository */
-    protected $config;
-
-    /** @var Container */
-    protected $container;
-
-    public function __construct(Repository $config, Container $container)
-    {
-        $this->config = $config;
-        $this->container = $container;
-    }
 
     /**
      * Resolve a class based on the driver configuration
@@ -34,11 +22,25 @@ class ConfigResolver
      */
     public function resolveSchedulerClass()
     {
-        try {
-            return $this->container->make($this->getDriver().'\\Scheduler', [$this]);
-        } catch (ReflectionException $e) {
-            return $this->container->make('Indatus\Dispatcher\Drivers\\'.$this->getDriver().'\\Scheduler', [$this]);
-        }
+        return App::make(
+            'Indatus\Dispatcher\Drivers\\'.$this->getDriver().'\\Scheduler', array(
+                $this
+            )
+        );
+
+        /*try {
+            return App::make(
+                config('dispatche.driver').'\\Scheduler', array(
+                    $this
+                )
+            );
+        } catch (\ReflectionException $e) {
+            return App::make(
+                'Indatus\Dispatcher\Drivers\\'.$this->getDriver().'\\Scheduler', array(
+                    $this
+                )
+            );
+        }*/
     }
 
     /**
@@ -48,11 +50,13 @@ class ConfigResolver
      */
     public function resolveServiceClass()
     {
-        try {
-            return $this->container->make($this->getDriver().'\\ScheduleService');
-        } catch (ReflectionException $e) {
-            return $this->container->make('Indatus\Dispatcher\Drivers\\'.$this->getDriver().'\\ScheduleService');
-        }
+        return App::make('Indatus\Dispatcher\Drivers\\'.$this->getDriver().'\\ScheduleService');
+
+        //try {
+        //    return App::make(config('dispatcher.driver').'\\ScheduleService');
+        //} catch (\ReflectionException $e) {
+        //    return App::make('Indatus\Dispatcher\Drivers\\'.$this->getDriver().'\\ScheduleService');
+        //}
     }
 
     /**
@@ -62,6 +66,7 @@ class ConfigResolver
      */
     public function getDriver()
     {
-        return ucfirst($this->config->get('dispatcher::driver'));
+        return ucwords(strtolower(config('dispatcher.driver')));
     }
+
 }

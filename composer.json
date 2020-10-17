@@ -1,43 +1,36 @@
 {
     "name": "indatus/dispatcher",
-    "description": "Schedule your artisan commands within your application's source code",
-    "keywords": ["laravel", "artisan", "dispatcher", "schedule", "cron"],
-    "type": "library",
+    "type": "laravel-library",
+    "description": "Schedule your artisan commands within your application",
+    "keywords": ["laravel", "artisan", "dispatcher", "schedule"],
     "license": "MIT",
     "authors": [
         {
             "name": "Ben Kuhl",
-            "email": "benkuhl@gmail.com",
-            "role": "Software Engineer"
+            "email": "bkuhl@indatus.com",
+            "role": "Developer"
         }
     ],
     "require": {
-        "php": ">=5.4",
-        "wp-cli/php-cli-tools": "~0.10.2",
-        "mtdowling/cron-expression": "~1.0.3",
-        "laravel/framework": "~5.0",
-        "nesbot/carbon": "~1.0"
-    },
-    "require-dev": {
-        "orchestra/testbench": "3.0.*",
-        "phpunit/phpunit": "~4.0",
-        "mockery/mockery": "~0.9",
-        "fabpot/php-cs-fixer": "~1.0",
-        "squizlabs/php_codesniffer": "~1.5"
+        "php": "^7.2.5",
+        "wp-cli/php-cli-tools": "v0.9.4-patch46",
+        "mtdowling/cron-expression" : "~1.0.3",
+        "composer/installers": "^1.9"
     },
     "autoload": {
         "classmap": [
             "tests/TestCase.php"
         ],
-        "psr-0": {
-            "Indatus\\Dispatcher\\": "src/"
+        "psr-4": {
+            "Indatus\\Dispatcher\\": "src/Indatus/Dispatcher"
         }
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "2.0.x-dev"
+        "laravel": {
+            "providers": [
+                "Indatus\\Dispatcher\\ServiceProvider"
+            ]
         }
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "minimum-stability": "stable"
 }

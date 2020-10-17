@@ -9,11 +9,15 @@
  * file that was distributed with this source code.
  */
 
+use App;
+use Indatus\Dispatcher\Scheduling\ScheduledCommand;
 use Indatus\Dispatcher\Scheduling\ScheduledCommandInterface;
 use Indatus\Dispatcher\Services\CommandService;
+use Symfony\Component\Process\Process;
 
 class BackgroundProcessRunner
 {
+
     /**
      * @var \Indatus\Dispatcher\Services\CommandService
      */
@@ -27,15 +31,15 @@ class BackgroundProcessRunner
     /**
      * Run a scheduled command
      *
-     * @param  \Indatus\Dispatcher\Scheduling\ScheduledCommandInterface $scheduledCommand
-     * @param  array                                                    $arguments
-     * @param  array                                                    $options
+     * @param \Indatus\Dispatcher\Scheduling\ScheduledCommandInterface  $scheduledCommand
+     * @param array                                                     $arguments
+     * @param array                                                     $options
      * @return bool
      */
     public function run(
         ScheduledCommandInterface $scheduledCommand,
-        array $arguments = [],
-        array $options = [],
+        array $arguments = array(),
+        array $options = array(),
         Debugger $debugger = null
     ) {
         $runCommand = $this->commandService->getRunCommand($scheduledCommand, $arguments, $options);

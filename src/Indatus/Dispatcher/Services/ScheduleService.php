@@ -10,20 +10,16 @@
  */
 
 use App;
-use Illuminate\Contracts\Console\Kernel;
+use Artisan;
 use Indatus\Dispatcher\Debugger;
 use Indatus\Dispatcher\Scheduling\Schedulable;
 use Indatus\Dispatcher\Scheduling\ScheduledCommandInterface;
+use Indatus\Dispatcher\Scheduling\ScheduleException;
+use Indatus\Dispatcher\Table;
+use Symfony\Component\Process\Exception\InvalidArgumentException;
 
 abstract class ScheduleService
 {
-    /** @var Kernel */
-    protected $console;
-
-    public function __construct(Kernel $console)
-    {
-        $this->console = $console;
-    }
 
     /**
      * Determine if a command is due to be run
@@ -41,9 +37,9 @@ abstract class ScheduleService
      */
     public function getScheduledCommands()
     {
-        $scheduledCommands = [];
-        foreach ($this->console->all() as $command) {
-            if ($command instanceof ScheduledCommandInterface) {
+        $scheduledCommands = array();
+        foreach (Artisan::all() as $command) {
+            if ($command instanceOf ScheduledCommandInterface) {
                 $scheduledCommands[] = $command;
             }
         }
@@ -66,20 +62,20 @@ abstract class ScheduleService
 
         /** @var \Indatus\Dispatcher\Scheduling\ScheduledCommandInterface $command */
         foreach ($this->getScheduledCommands() as $command) {
+
             /** @var \Indatus\Dispatcher\Scheduling\Schedulable $scheduler */
             $scheduler = App::make('Indatus\Dispatcher\Scheduling\Schedulable');
 
             //could be multiple schedules based on arguments
             $schedules = $command->schedule($scheduler);
             if (!is_array($schedules)) {
-                $schedules = [$schedules];
+                $schedules = array($schedules);
             }
 
             $willBeRun = false;
             foreach ($schedules as $schedule) {
-                if (($schedule instanceof Schedulable) === false) {
-                    $msg = 'Schedule for "'.$command->getName().'" is not an instance of Schedulable';
-                    throw new \InvalidArgumentException($msg);
+                if (($schedule instanceOf Schedulable) === false) {
+                    throw new \InvalidArgumentException('Schedule for "'.$command->getName().'" is not an instance of Schedulable');
                 }
 
                 if ($this->isDue($schedule)) {
@@ -109,4 +105,5 @@ abstract class ScheduleService
      * @return void
      */
     abstract public function printSummary();
+
 }

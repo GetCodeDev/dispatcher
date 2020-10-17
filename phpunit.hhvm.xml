@@ -7,15 +7,14 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnError="false"
          stopOnFailure="false"
-         syntaxCheck="true"
-         strict="false"
-         verbose="true"
+         syntaxCheck="false"
 >
     <testsuites>
-        <testsuite name="Dispatcher Test Suite">
+        <testsuite name="Package Test Suite">
             <directory suffix=".php">./tests/</directory>
+            <exclude>./tests/TestCase.php</exclude>
+            <exclude>./vendor</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

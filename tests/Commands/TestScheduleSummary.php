@@ -1,14 +1,14 @@
-<?php namespace Indatus\Dispatcher\Commands;
-
+<?php
 /**
  * @author Ben Kuhl <bkuhl@indatus.com>
  */
 
+use Indatus\Dispatcher\Commands\ScheduleSummary;
 use Mockery as m;
-use TestCase;
 
 class TestScheduleSummary extends TestCase
 {
+
     /** @var  \Mockery\MockInterface */
     private $scheduleService;
 
@@ -22,6 +22,12 @@ class TestScheduleSummary extends TestCase
         $this->scheduleService = m::mock('Indatus\Dispatcher\Services\ScheduleService');
 
         $this->command = new ScheduleSummary($this->scheduleService);
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+        m::close();
     }
 
     public function testName()
@@ -41,4 +47,5 @@ class TestScheduleSummary extends TestCase
             }));
         $scheduleService->fire();
     }
-}
+
+} 

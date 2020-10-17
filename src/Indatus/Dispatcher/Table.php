@@ -16,4 +16,5 @@
  */
 class Table extends \cli\Table implements TableInterface
 {
+
 }
